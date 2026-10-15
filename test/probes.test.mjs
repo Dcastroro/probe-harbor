@@ -49,6 +49,19 @@ test('malformed JSON, encoding, media type and assertion mismatches use fixed co
     assert.equal(report.results[0].code, code); assert.equal(JSON.stringify(report).includes('PRIVATE'), false);
   }
 });
+
+test('identity content coding is case-insensitive without admitting compressed or stacked codings', async t => {
+  for (const [encoding,expected] of [['identity','healthy'],['Identity','healthy'],['IDENTITY','healthy'],['iDeNtItY','healthy'],['GZIP','unsupported-encoding'],['identity, gzip','unsupported-encoding'],['gzip, identity','unsupported-encoding']]) {
+    const s = await server(t,(req,res) => {
+      res.writeHead(200,{'content-type':'application/json','content-encoding':encoding});
+      res.end('{"status":"ready","private":"PRIVATE_BODY"}');
+    });
+    const report = await runProbes(config(check(s.url,{assertions:[{pointer:'/status',equals:'ready'}]})),{retries:2});
+    assert.equal(report.results[0].code,expected,encoding);
+    assert.equal(report.summary.attempts,1);
+    assert.equal(JSON.stringify(report).includes('PRIVATE_'),false);
+  }
+});
 test('redirects are not followed, including when the redirect status is expected', async t => {
   let followed = 0;
   const target = await server(t, (req, res) => { followed++; res.end(); });

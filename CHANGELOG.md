@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 — 2026-10-15
+
+- Accept case-insensitive identity content coding on JSON assertion responses.
+- Preserve rejection of compressed and stacked codings, fixed diagnostics and no retries for encoding failures.
+- Cover mixed-case tokens and coding stacks with real loopback HTTP tests.
+
 ## 0.1.0 — 2026-10-15
 
 - GET/HEAD HTTP/HTTPS readiness checks with exact status/media type expectations.

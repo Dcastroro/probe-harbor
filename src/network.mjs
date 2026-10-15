@@ -85,7 +85,10 @@ export async function probeAttempt(check, state) {
             const type = typeof res.headers['content-type'] === 'string' ? res.headers['content-type'].split(';')[0].trim().toLowerCase() : '';
             if ((check.contentType && type !== check.contentType) || (check.assertions.length && !isJsonType(type))) { finish('unexpected-content-type'); return; }
             if (check.assertions.length) {
-              if (res.headers['content-encoding'] && res.headers['content-encoding'] !== 'identity') { finish('unsupported-encoding'); return; }
+              // HTTP content-coding tokens are case-insensitive (RFC 9110 §8.4.1).
+              // Accept a single identity token; never decompress or accept a coding stack.
+              const encoding = res.headers['content-encoding'];
+              if (encoding && encoding.trim().toLowerCase() !== 'identity') { finish('unsupported-encoding'); return; }
               let value;
               try { value = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(Buffer.concat(chunks))); }
               catch { finish('invalid-json'); return; }
