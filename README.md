@@ -83,6 +83,9 @@ node bin/probe-harbor.mjs run --config examples/probes.json --format json --conc
 JSON assertions require `application/json` or an `application/*+json` response.
 Pointer escapes `~0` and `~1` are supported; array indices are strict and prototype
 properties are never traversed. Compressed JSON is rejected rather than inflated.
+A single `identity` Content-Encoding token is accepted case-insensitively, following
+[HTTP token semantics](https://www.rfc-editor.org/rfc/rfc9110.html#section-8.4.1).
+Compressed or stacked content codings remain unsupported.
 Configuration is validated completely before any request starts.
 
 ## Use it from JavaScript
