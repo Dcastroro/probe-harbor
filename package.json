@@ -1,0 +1,23 @@
+{
+  "name": "probe-harbor",
+  "version": "0.1.0",
+  "description": "Bounded HTTP/HTTPS health checks with concurrency, cancellation, JSON assertions and metadata-only CI reports.",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "author": "David Castro",
+  "engines": { "node": ">=22" },
+  "bin": { "probe-harbor": "bin/probe-harbor.mjs" },
+  "exports": "./src/index.mjs",
+  "repository": { "type": "git", "url": "git+https://github.com/Dcastroro/probe-harbor.git" },
+  "homepage": "https://github.com/Dcastroro/probe-harbor#readme",
+  "bugs": { "url": "https://github.com/Dcastroro/probe-harbor/issues" },
+  "scripts": {
+    "test": "node --test",
+    "check": "node scripts/check.mjs",
+    "demo": "node examples/demo.mjs",
+    "repo:check": "node scripts/repository-check.mjs",
+    "release:build": "node scripts/build-release.mjs"
+  },
+  "keywords": ["health-check", "http", "automation", "developer-tools", "ci", "observability", "nodejs"]
+}

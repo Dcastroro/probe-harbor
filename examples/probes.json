@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "id": "api-ready",
+      "url": "http://127.0.0.1:3000/ready",
+      "timeoutMs": 2000,
+      "expectedStatus": [200],
+      "assertions": [{ "pointer": "/status", "equals": "ready" }]
+    },
+    { "id": "web-alive", "url": "http://127.0.0.1:8080/health", "method": "HEAD", "expectedStatus": [200, 204] }
+  ]
+}
