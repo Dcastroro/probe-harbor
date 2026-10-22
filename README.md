@@ -69,6 +69,13 @@ node bin/probe-harbor.mjs validate --config examples/probes.json
 node bin/probe-harbor.mjs run --config examples/probes.json --format json --concurrency 4 --deadline-ms 30000 --retries 1
 ```
 
+Use `--format junit` on `run` to produce a JUnit XML report for a CI test-report
+viewer. Each configured ID appears once, in input order; only the final outcome
+counts as a failure. Cancelled/deadline checks, including queued checks that
+never started, appear as failures. Reports contain IDs, fixed result codes and
+times, without endpoint URLs, headers or bodies. Exit codes remain 0/1/2.
+See [CI reporting](docs/ci.md#junit-test-reports) for file output and error handling.
+
 | Field | Meaning |
 | --- | --- |
 | `id` | Unique lowercase report ID, up to 64 letters/digits/hyphens, starting with a letter. |

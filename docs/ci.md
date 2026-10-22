@@ -42,6 +42,27 @@ and review changes to destination configuration. The tool is an operator-driven
 network client; it is not a proxy that safely accepts arbitrary public URLs.
 Do not use `pull_request_target` to run untrusted repository code.
 
+## JUnit test reports
+
+```sh
+node tools/probe-harbor/bin/probe-harbor.mjs run --config ci/probes.json --format junit > probe-harbor.xml
+```
+
+Pass the resulting XML to your existing JUnit report viewer. A run produces one
+testcase per configured ID, in input order, and uses fixed diagnostic codes for
+failures. A successful retry yields one successful testcase. Cancelled or queued
+checks remain accounted for as failures, never as skipped tests.
+
+Suite time is total elapsed run time in seconds; testcase time is the sum of its
+attempt durations in seconds, excluding retry backoff. Queued checks have zero
+attempt time. Review configured IDs before sharing reports.
+
+Keep the original exit status: 0 means all healthy, 1 means unhealthy/cancelled,
+and 2 means input/tool failure. Exit-2 diagnostics remain JSON even when JUnit was
+requested, so only submit exit-0/1 reports to an XML viewer. Do not suppress an
+exit-2 failure or publish its JSON as a successful test report. JUnit is available
+only for `run`; offline `validate` retains its JSON validation output.
+
 ## Self-contained verification
 
 ```sh

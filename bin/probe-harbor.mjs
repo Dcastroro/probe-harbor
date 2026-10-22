@@ -3,12 +3,13 @@ import { readFileSync, openSync, readSync, fstatSync, lstatSync, closeSync } fro
 import { resolve, parse, join } from 'node:path';
 import { runProbes, validateConfig, HarborError, LIMITS } from '../src/index.mjs';
 import { fail } from '../src/config.mjs';
+import { junitReport } from '../src/junit.mjs';
 const VERSION = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
 const HELP = `Probe Harbor ${VERSION}
 Bounded HTTP/HTTPS health checks with metadata-only reports.
 
   probe-harbor validate --config probes.json
-  probe-harbor run --config probes.json [--format text|json]
+  probe-harbor run --config probes.json [--format text|json|junit]
 
   --concurrency N    1..32; default 4
   --deadline-ms N    50..120000; default 30000
@@ -52,7 +53,7 @@ try {
       values.set(key, value);
     }
     const format = values.get('--format') ?? 'text';
-    if (!['text', 'json'].includes(format)) fail('usage');
+    if (!['text', 'json', 'junit'].includes(format) || (command === 'validate' && format === 'junit')) fail('usage');
     if (command === 'validate' && [...values.keys()].some(key => !['--config', '--format'].includes(key))) fail('usage');
     const config = readConfig(values.get('--config') ?? 'probes.json');
     if (command === 'validate') console.log(JSON.stringify(validateConfig(config)));
@@ -67,6 +68,7 @@ try {
       try { report = await runProbes(config, { ...options, signal: controller.signal }); }
       finally { process.removeListener('SIGINT', cancel); process.removeListener('SIGTERM', cancel); }
       if (format === 'json') console.log(JSON.stringify(report, null, 2));
+      else if (format === 'junit') process.stdout.write(junitReport(report));
       else {
         console.log(`Probe Harbor: ${report.summary.healthy}/${report.summary.checks} healthy; ${report.summary.attempts} attempts; ${report.summary.bytes} body bytes.`);
         for (const result of report.results) console.log(`  ${result.id}: ${result.code} (${result.attempts.length} attempts)`);
