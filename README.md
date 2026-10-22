@@ -94,6 +94,10 @@ A single `identity` Content-Encoding token is accepted case-insensitively, follo
 [HTTP token semantics](https://www.rfc-editor.org/rfc/rfc9110.html#section-8.4.1).
 Compressed or stacked content codings remain unsupported.
 Configuration is validated completely before any request starts.
+The JavaScript API rejects sparse `checks`, `expectedStatus` and `assertions`
+arrays, including missing entries supplied through an array prototype, with
+`invalid-config`. Use dense arrays with an explicit value at every index.
+This concerns JavaScript callers; JSON files cannot represent array holes.
 
 ## Use it from JavaScript
 
