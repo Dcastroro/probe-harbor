@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync, openSync, readSync, fstatSync, lstatSync, closeSync } from 'node:fs';
+import { constants, readFileSync, openSync, readSync, fstatSync, lstatSync, closeSync } from 'node:fs';
 import { resolve, parse, join } from 'node:path';
 import { runProbes, validateConfig, HarborError, LIMITS } from '../src/index.mjs';
 import { fail } from '../src/config.mjs';
@@ -31,7 +31,11 @@ function readConfig(path) {
       current = join(current, part);
       if (lstatSync(current).isSymbolicLink()) fail('config-file');
     }
-    fd = openSync(absolute, 'r'); const stat = fstatSync(fd);
+    // Reject special files before opening; a FIFO with no writer would block.
+    if (!lstatSync(absolute).isFile()) fail('config-file');
+    // Recheck the descriptor below, and avoid blocking on a FIFO substituted
+    // after lstat. POSIX-only flags are absent on Windows.
+    fd = openSync(absolute, constants.O_RDONLY | (constants.O_NONBLOCK ?? 0) | (constants.O_NOFOLLOW ?? 0)); const stat = fstatSync(fd);
     if (!stat.isFile() || stat.size > LIMITS.configBytes) fail('config-file');
     const buffer = Buffer.alloc(LIMITS.configBytes + 1); let size = 0, count;
     while (size < buffer.length && (count = readSync(fd, buffer, size, buffer.length - size, null)) > 0) size += count;
