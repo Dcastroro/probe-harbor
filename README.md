@@ -111,6 +111,18 @@ See the [report contract and execution model](docs/architecture.md).
 
 ## CI behavior
 
+To recheck selected services without editing the config, use
+`run --only api-ready,web-alive` or pass `{ only: ['api-ready', 'web-alive'] }`
+to `runProbes`. IDs are exact and case-sensitive, with no spaces or wildcards.
+The nonempty selection must contain unique configured IDs. Unknown IDs fail
+with `unknown-check`; malformed selections fail with `invalid-config`.
+
+The full configuration is still validated before any request, including checks
+outside the selection. Results retain configuration order; summary counts and
+the healthy exit status describe only the selected checks. Global byte/deadline,
+retry, TLS and concurrency rules still apply. Without `only`, all checks run.
+Offline `validate` rejects `--only` and always validates the complete config.
+
 | Exit | Meaning |
 | --- | --- |
 | `0` | Every check is healthy, or configuration validation succeeded. |

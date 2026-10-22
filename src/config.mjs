@@ -58,7 +58,19 @@ export function normalizeConfig(config) {
 }
 export function validateConfig(config) { return { version: 1, valid: true, checks: normalizeConfig(config).length }; }
 export function normalizeOptions(options) {
-  keys(options, ['concurrency', 'deadlineMs', 'retries', 'totalBytes', 'signal']);
+  keys(options, ['concurrency', 'deadlineMs', 'retries', 'totalBytes', 'signal', 'only']);
   if (options.signal !== undefined && !(options.signal instanceof AbortSignal)) fail('invalid-config');
-  return { concurrency: integer(options.concurrency, 1, LIMITS.concurrency, 4), deadlineMs: integer(options.deadlineMs, 50, LIMITS.deadlineMs, 30_000), retries: integer(options.retries, 0, LIMITS.retries, 0), totalBytes: integer(options.totalBytes, 128, LIMITS.totalBytes, LIMITS.totalBytes), signal: options.signal };
+  let only;
+  if (options.only !== undefined) {
+    const values = options.only;
+    if (!Array.isArray(values) || !values.length || values.length > LIMITS.checks) fail('invalid-config');
+    only = []; const seen = new Set();
+    for (let index = 0; index < values.length; index += 1) {
+      if (!Object.hasOwn(values, index)) fail('invalid-config');
+      const id = values[index];
+      if (typeof id !== 'string' || !/^[a-z][a-z0-9-]{0,63}$/.test(id) || seen.has(id)) fail('invalid-config');
+      seen.add(id); only.push(id);
+    }
+  }
+  return { concurrency: integer(options.concurrency, 1, LIMITS.concurrency, 4), deadlineMs: integer(options.deadlineMs, 50, LIMITS.deadlineMs, 30_000), retries: integer(options.retries, 0, LIMITS.retries, 0), totalBytes: integer(options.totalBytes, 128, LIMITS.totalBytes, LIMITS.totalBytes), signal: options.signal, only };
 }

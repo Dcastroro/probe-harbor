@@ -13,6 +13,7 @@ CLI input/tool errors exit `2` and use JSON even in text mode:
 | `config-limit` | Reduce serialized configuration size. |
 | `invalid-json` | Supply valid UTF-8 JSON. |
 | `invalid-config` | Check version, allowed fields, unique IDs, methods, bounds, statuses and primitive assertions. |
+| `unknown-check` | Every selected ID must exist in the validated config. Correct `--only` or the API `only` list; values are not echoed. |
 | `invalid-url` | Use an absolute credential-free HTTPS URL, or HTTP on literal loopback; remove query/fragment/userinfo. |
 | `internal-error` | Stop the pipeline and provide a minimal fictional reproduction. |
 

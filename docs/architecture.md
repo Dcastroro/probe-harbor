@@ -1,7 +1,11 @@
 # Execution and report contract
 
 One run validates the full configuration and options, creates a bounded worker
-pool and returns one result for every configured ID, in its original order.
+pool and returns one result for every selected ID, in configuration order.
+Without the optional `only` list, every configured ID is selected. An explicit
+list must contain 1–1,000 unique valid IDs, each an own array entry; unknown IDs
+fail before DNS or HTTP starts. Even unselected checks undergo full validation.
+Summary counts and health describe the selected run, not omitted checks.
 Configuration URLs and assertions are copied into private execution state and
 never added to reports. Configuration mutation during execution is unsupported.
 
