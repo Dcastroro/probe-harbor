@@ -9,6 +9,15 @@ export function isJsonType(value) { return value === 'application/json' || /^app
 function keys(value, allowed) {
   if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).some(key => !allowed.includes(key))) fail('invalid-config');
 }
+function denseArray(value, min, max) {
+  if (!Array.isArray(value) || value.length < min || value.length > max) return false;
+  // map/some skip holes and can read inherited entries. Require every own slot
+  // before normalization, checking length first to keep this walk bounded.
+  for (let index = 0; index < value.length; index += 1) {
+    if (!Object.hasOwn(value, index)) return false;
+  }
+  return true;
+}
 export function integer(value, min, max, fallback) {
   if (value === undefined) return fallback;
   if (!Number.isSafeInteger(value) || value < min || value > max) fail('invalid-config');
@@ -22,7 +31,7 @@ function pointer(value) {
 }
 export function normalizeConfig(config) {
   keys(config, ['version', 'checks']);
-  if (config.version !== 1 || !Array.isArray(config.checks) || !config.checks.length || config.checks.length > LIMITS.checks) fail('invalid-config');
+  if (config.version !== 1 || !denseArray(config.checks, 1, LIMITS.checks)) fail('invalid-config');
   const ids = new Set();
   const checks = config.checks.map(check => {
     keys(check, ['id', 'url', 'method', 'timeoutMs', 'maxBytes', 'expectedStatus', 'contentType', 'assertions']);
@@ -38,11 +47,11 @@ export function normalizeConfig(config) {
     const method = check.method === undefined ? 'GET' : check.method;
     if (!['GET', 'HEAD'].includes(method)) fail('invalid-config');
     const statuses = check.expectedStatus === undefined ? [200] : check.expectedStatus;
-    if (!Array.isArray(statuses) || !statuses.length || statuses.length > 10 || statuses.some(status => !Number.isInteger(status) || status < 200 || status > 599) || new Set(statuses).size !== statuses.length) fail('invalid-config');
+    if (!denseArray(statuses, 1, 10) || statuses.some(status => !Number.isInteger(status) || status < 200 || status > 599) || new Set(statuses).size !== statuses.length) fail('invalid-config');
     const contentType = check.contentType;
     if (contentType !== undefined && (typeof contentType !== 'string' || contentType.length > 128 || !/^[a-z0-9!#$&^_.+-]+\/[a-z0-9!#$&^_.+-]+$/.test(contentType))) fail('invalid-config');
     const assertions = check.assertions === undefined ? [] : check.assertions;
-    if (!Array.isArray(assertions) || assertions.length > LIMITS.assertions || (method === 'HEAD' && assertions.length)) fail('invalid-config');
+    if (!denseArray(assertions, 0, LIMITS.assertions) || (method === 'HEAD' && assertions.length)) fail('invalid-config');
     const normalizedAssertions = assertions.map(assertion => {
       keys(assertion, ['pointer', 'equals']);
       const expected = assertion.equals;
