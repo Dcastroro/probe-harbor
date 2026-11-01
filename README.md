@@ -69,12 +69,9 @@ node bin/probe-harbor.mjs validate --config examples/probes.json
 node bin/probe-harbor.mjs run --config examples/probes.json --format json --concurrency 4 --deadline-ms 30000 --retries 1
 ```
 
-Use `--format junit` on `run` to produce a JUnit XML report for a CI test-report
-viewer. Each configured ID appears once, in input order; only the final outcome
-counts as a failure. Cancelled/deadline checks, including queued checks that
-never started, appear as failures. Reports contain IDs, fixed result codes and
-times, without endpoint URLs, headers or bodies. Exit codes remain 0/1/2.
-See [CI reporting](docs/ci.md#junit-test-reports) for file output and error handling.
+Configuration must be a regular JSON file. Directories, symbolic links and
+special files such as POSIX FIFOs are rejected with `config-file`; a FIFO without
+a writer does not leave `validate` or `run` waiting for input.
 
 | Field | Meaning |
 | --- | --- |
