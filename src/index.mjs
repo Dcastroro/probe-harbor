@@ -1,5 +1,5 @@
 import { setTimeout as delay } from 'node:timers/promises';
-import { normalizeConfig, normalizeOptions } from './config.mjs';
+import { normalizeConfig, normalizeOptions, fail } from './config.mjs';
 import { probeAttempt } from './network.mjs';
 export { HarborError, LIMITS, validateConfig } from './config.mjs';
 
@@ -10,7 +10,14 @@ function retryable(attempt) {
 
 /** One bounded run. Endpoint data is never copied into the returned report. */
 export async function runProbes(config, options = {}) {
-  const checks = normalizeConfig(config), settings = normalizeOptions(options);
+  // Validate the complete configuration before selection, including unused URLs.
+  const allChecks = normalizeConfig(config), settings = normalizeOptions(options);
+  const selected = settings.only === undefined ? undefined : new Set(settings.only);
+  if (selected) {
+    const known = new Set(allChecks.map(check => check.id));
+    if ([...selected].some(id => !known.has(id))) fail('unknown-check');
+  }
+  const checks = selected ? allChecks.filter(check => selected.has(check.id)) : allChecks;
   const start = performance.now();
   const controller = new AbortController();
   let stop, bytes = 0, next = 0;

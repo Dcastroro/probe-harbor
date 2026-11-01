@@ -14,6 +14,7 @@ Bounded HTTP/HTTPS health checks with metadata-only reports.
   --deadline-ms N    50..120000; default 30000
   --retries N        0..2; default 0
   --total-bytes N    128..16777216; default 16777216
+  --only IDS         Run only comma-separated check IDs; validates the full config
   --help            Show help
   --version         Show version
 
@@ -48,7 +49,7 @@ try {
     const values = new Map();
     for (let index = 0; index < args.length; index += 1) {
       const key = args[index], value = args[++index];
-      if (!['--config', '--format', '--concurrency', '--deadline-ms', '--retries', '--total-bytes'].includes(key) || values.has(key) || !value || value.startsWith('--')) fail('usage');
+      if (!['--config', '--format', '--concurrency', '--deadline-ms', '--retries', '--total-bytes', '--only'].includes(key) || values.has(key) || !value || value.startsWith('--')) fail('usage');
       values.set(key, value);
     }
     const format = values.get('--format') ?? 'text';
@@ -58,6 +59,7 @@ try {
     if (command === 'validate') console.log(JSON.stringify(validateConfig(config)));
     else {
       const options = {};
+      if (values.has('--only')) options.only = values.get('--only').split(',');
       for (const [flag, name] of [['--concurrency', 'concurrency'], ['--deadline-ms', 'deadlineMs'], ['--retries', 'retries'], ['--total-bytes', 'totalBytes']]) {
         if (values.has(flag)) { const text = values.get(flag); if (!/^\d+$/.test(text)) fail('usage'); options[name] = Number(text); }
       }
