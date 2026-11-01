@@ -1,6 +1,6 @@
 # Diagnostic codes
 
-CLI input/tool errors exit `2` and use JSON even in text mode:
+CLI input/tool errors exit `2` and use JSON even in text or JUnit mode:
 
 ```json
 {"version":1,"ok":false,"error":{"code":"invalid-url"}}
