@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Add `--only` / `only` selection of checks by ID after full configuration validation.
+- Add metadata-only JUnit output (`run --format junit`) for CI test reports.
+- Reject sparse `checks`, `expectedStatus` and `assertions` arrays.
+- Reject special configuration files such as FIFOs without blocking.
+
 ## 0.1.1 — 2026-10-15
 
 - Accept case-insensitive identity content coding on JSON assertion responses.
